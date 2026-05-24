@@ -193,3 +193,82 @@ fn insert_data_dir(data: &mut liquid::Object, data_root: &path::Path) -> Result<
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use serde_json::json;
+
+    use super::*;
+
+    #[test]
+    fn from_config_trims_trailing_slash() {
+        let site = Site::from_config(cobalt_config::Site {
+            base_url: Some("https://example.com/".into()),
+            ..Default::default()
+        });
+
+        assert_eq!(site.base_url, Some("https://example.com".into()));
+    }
+
+    #[test]
+    fn load_data_supports_known_formats() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path();
+
+        fs::write(root.join("config.yml"), "name: cobalt\n").unwrap();
+        fs::write(root.join("config.json"), r#"{"name":"cobalt"}"#).unwrap();
+        fs::write(root.join("config.toml"), "name = 'cobalt'\n").unwrap();
+
+        assert_eq!(serde_json::to_value(load_data(&root.join("config.yml")).unwrap()).unwrap(), json!({"name": "cobalt"}));
+        assert_eq!(serde_json::to_value(load_data(&root.join("config.json")).unwrap()).unwrap(), json!({"name": "cobalt"}));
+        assert_eq!(serde_json::to_value(load_data(&root.join("config.toml")).unwrap()).unwrap(), json!({"name": "cobalt"}));
+    }
+
+    #[test]
+    fn load_data_rejects_unknown_extensions() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path();
+        let data_file = root.join("config.txt");
+        fs::write(&data_file, "name=cobalt").unwrap();
+
+        let err = load_data(&data_file).unwrap_err();
+
+        assert!(err.to_string().contains("unknown file type"));
+    }
+
+    #[test]
+    fn load_merges_in_memory_and_directory_data() {
+        let temp = tempfile::tempdir().unwrap();
+        let source = temp.path();
+        let data_dir = source.join("_data");
+        fs::create_dir(&data_dir).unwrap();
+        fs::create_dir(data_dir.join("authors")).unwrap();
+        fs::write(data_dir.join("authors").join("ada.yml"), "name: Ada\n").unwrap();
+        fs::write(data_dir.join("settings.json"), r#"{"theme":"dark"}"#).unwrap();
+
+        let mut seeded_data = liquid::Object::new();
+        seeded_data.insert("existing".into(), liquid::model::Value::scalar("value"));
+        let site = Site {
+            title: Some("Docs".into()),
+            description: Some("Project docs".into()),
+            base_url: Some("https://example.com".into()),
+            at_uri: Some("/docs".into()),
+            data: Some(seeded_data),
+            data_dir: "_data",
+            ..Default::default()
+        };
+
+        let actual = serde_json::to_value(site.load(source).unwrap()).unwrap();
+
+        assert_eq!(actual["title"], "Docs");
+        assert_eq!(actual["description"], "Project docs");
+        assert_eq!(actual["base_url"], "https://example.com");
+        assert_eq!(actual["at_uri"], "/docs");
+        assert_eq!(actual["data"]["existing"], "value");
+        assert_eq!(actual["data"]["authors"]["ada"]["name"], "Ada");
+        assert_eq!(actual["data"]["settings"]["theme"], "dark");
+        assert!(actual.get("time").is_some());
+    }
+}

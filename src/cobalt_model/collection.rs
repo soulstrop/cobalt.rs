@@ -125,3 +125,110 @@ impl Collection {
         attributes
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    fn common_default() -> Frontmatter {
+        Frontmatter::from_config(cobalt_config::Frontmatter {
+            slug: Some("common-slug".into()),
+            title: Some("Common Title".into()),
+            description: Some("Common Description".into()),
+            ..Default::default()
+        })
+        .unwrap()
+    }
+
+    #[test]
+    fn from_page_config_uses_site_metadata() {
+        let site = cobalt_config::Site {
+            title: Some("Site Title".into()),
+            description: Some("Site Description".into()),
+            ..Default::default()
+        };
+
+        let actual =
+            Collection::from_page_config(cobalt_config::PageCollection::default(), &site, &common_default())
+                .unwrap();
+
+        assert_eq!(actual.title, "Site Title");
+        assert_eq!(actual.slug, "pages");
+        assert_eq!(actual.description, Some("Site Description".into()));
+        assert_eq!(actual.dir.as_str(), "");
+        assert_eq!(actual.order, SortOrder::None);
+        assert_eq!(actual.default.collection, "pages");
+        assert_eq!(actual.default.excerpt_separator, "");
+    }
+
+    #[test]
+    fn from_post_config_uses_site_defaults_and_ignores_drafts() {
+        let site = cobalt_config::Site {
+            title: Some("Blog".into()),
+            description: Some("Blog Description".into()),
+            ..Default::default()
+        };
+        let config = cobalt_config::PostCollection {
+            drafts_dir: Some(cobalt_config::RelPath::from_unchecked("drafts")),
+            ..Default::default()
+        };
+
+        let actual = Collection::from_post_config(config, &site, false, &common_default()).unwrap();
+
+        assert_eq!(actual.title, "Blog");
+        assert_eq!(actual.description, Some("Blog Description".into()));
+        assert_eq!(actual.slug, "posts");
+        assert_eq!(actual.dir.as_str(), "posts");
+        assert_eq!(actual.drafts_dir, None);
+        assert_eq!(actual.default.collection, "posts");
+    }
+
+    #[test]
+    fn from_post_config_preserves_drafts_when_enabled() {
+        let config = cobalt_config::PostCollection {
+            title: Some("Posts".into()),
+            drafts_dir: Some(cobalt_config::RelPath::from_unchecked("drafts")),
+            ..Default::default()
+        };
+
+        let actual =
+            Collection::from_post_config(config, &cobalt_config::Site::default(), true, &common_default())
+                .unwrap();
+
+        assert_eq!(
+            actual.drafts_dir.as_ref().map(cobalt_config::RelPath::as_str),
+            Some("drafts")
+        );
+    }
+
+    #[test]
+    fn attributes_include_optional_feeds() {
+        let collection = Collection {
+            title: "Posts".into(),
+            slug: "posts".into(),
+            description: Some("Latest posts".into()),
+            dir: cobalt_config::RelPath::from_unchecked("posts"),
+            drafts_dir: None,
+            order: SortOrder::Desc,
+            rss: Some(cobalt_config::RelPath::from_unchecked("feed.xml")),
+            jsonfeed: Some(cobalt_config::RelPath::from_unchecked("feed.json")),
+            publish_date_in_filename: true,
+            default: common_default(),
+        };
+
+        let actual = serde_json::to_value(collection.attributes()).unwrap();
+
+        assert_eq!(
+            actual,
+            json!({
+                "description": "Latest posts",
+                "jsonfeed": "feed.json",
+                "rss": "feed.xml",
+                "slug": "posts",
+                "title": "Posts",
+            })
+        );
+    }
+}

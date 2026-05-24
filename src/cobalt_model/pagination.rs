@@ -59,3 +59,44 @@ pub fn is_date_index_sorted(v: &[DateIndex]) -> bool {
     copy.sort_unstable();
     copy.eq(v)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_config_returns_none_when_disabled() {
+        let actual = PaginationConfig::from_config(
+            cobalt_config::Pagination::default(),
+            &cobalt_config::Permalink::default(),
+        );
+
+        assert_eq!(actual, None);
+    }
+
+    #[test]
+    fn from_config_applies_defaults() {
+        let actual = PaginationConfig::from_config(
+            cobalt_config::Pagination {
+                include: Some(Include::Tags),
+                ..Default::default()
+            },
+            &cobalt_config::Permalink::default(),
+        )
+        .unwrap();
+
+        assert_eq!(actual.include, Include::Tags);
+        assert_eq!(actual.per_page, 10);
+        assert_eq!(actual.permalink_suffix, "{{num}}/");
+        assert_eq!(actual.order, SortOrder::Desc);
+        assert_eq!(actual.sort_by, vec!["published_date"]);
+        assert_eq!(actual.date_index, vec![DateIndex::Year, DateIndex::Month]);
+    }
+
+    #[test]
+    fn is_date_index_sorted_detects_unsorted_values() {
+        assert!(is_date_index_sorted(&[]));
+        assert!(is_date_index_sorted(&[DateIndex::Year, DateIndex::Month, DateIndex::Day]));
+        assert!(!is_date_index_sorted(&[DateIndex::Month, DateIndex::Year]));
+    }
+}
