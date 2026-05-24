@@ -221,9 +221,18 @@ mod tests {
         fs::write(root.join("config.json"), r#"{"name":"cobalt"}"#).unwrap();
         fs::write(root.join("config.toml"), "name = 'cobalt'\n").unwrap();
 
-        assert_eq!(serde_json::to_value(load_data(&root.join("config.yml")).unwrap()).unwrap(), json!({"name": "cobalt"}));
-        assert_eq!(serde_json::to_value(load_data(&root.join("config.json")).unwrap()).unwrap(), json!({"name": "cobalt"}));
-        assert_eq!(serde_json::to_value(load_data(&root.join("config.toml")).unwrap()).unwrap(), json!({"name": "cobalt"}));
+        assert_eq!(
+            serde_json::to_value(load_data(&root.join("config.yml")).unwrap()).unwrap(),
+            json!({"name": "cobalt"})
+        );
+        assert_eq!(
+            serde_json::to_value(load_data(&root.join("config.json")).unwrap()).unwrap(),
+            json!({"name": "cobalt"})
+        );
+        assert_eq!(
+            serde_json::to_value(load_data(&root.join("config.toml")).unwrap()).unwrap(),
+            json!({"name": "cobalt"})
+        );
     }
 
     #[test]

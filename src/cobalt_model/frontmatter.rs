@@ -138,11 +138,17 @@ mod tests {
         assert_eq!(actual.excerpt_separator, "\n\n");
         assert_eq!(actual.weight, 0);
         assert!(!actual.is_draft);
-        assert_eq!(actual.pagination.as_ref().unwrap().include, cobalt_config::Include::Tags);
+        assert_eq!(
+            actual.pagination.as_ref().unwrap().include,
+            cobalt_config::Include::Tags
+        );
         assert_eq!(actual.pagination.as_ref().unwrap().per_page, 10);
         assert_eq!(
             actual.pagination.as_ref().unwrap().date_index,
-            vec![cobalt_config::DateIndex::Year, cobalt_config::DateIndex::Month]
+            vec![
+                cobalt_config::DateIndex::Year,
+                cobalt_config::DateIndex::Month
+            ]
         );
     }
 

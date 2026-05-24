@@ -96,7 +96,11 @@ mod tests {
     #[test]
     fn is_date_index_sorted_detects_unsorted_values() {
         assert!(is_date_index_sorted(&[]));
-        assert!(is_date_index_sorted(&[DateIndex::Year, DateIndex::Month, DateIndex::Day]));
+        assert!(is_date_index_sorted(&[
+            DateIndex::Year,
+            DateIndex::Month,
+            DateIndex::Day
+        ]));
         assert!(!is_date_index_sorted(&[DateIndex::Month, DateIndex::Year]));
     }
 }

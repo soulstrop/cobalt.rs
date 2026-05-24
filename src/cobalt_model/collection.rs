@@ -133,13 +133,12 @@ mod tests {
     use super::*;
 
     fn common_default() -> Frontmatter {
-        Frontmatter::from_config(cobalt_config::Frontmatter {
+        Frontmatter {
             slug: Some("common-slug".into()),
             title: Some("Common Title".into()),
             description: Some("Common Description".into()),
             ..Default::default()
-        })
-        .unwrap()
+        }
     }
 
     #[test]
@@ -150,17 +149,20 @@ mod tests {
             ..Default::default()
         };
 
-        let actual =
-            Collection::from_page_config(cobalt_config::PageCollection::default(), &site, &common_default())
-                .unwrap();
+        let actual = Collection::from_page_config(
+            cobalt_config::PageCollection::default(),
+            &site,
+            &common_default(),
+        )
+        .unwrap();
 
         assert_eq!(actual.title, "Site Title");
         assert_eq!(actual.slug, "pages");
         assert_eq!(actual.description, Some("Site Description".into()));
         assert_eq!(actual.dir.as_str(), "");
         assert_eq!(actual.order, SortOrder::None);
-        assert_eq!(actual.default.collection, "pages");
-        assert_eq!(actual.default.excerpt_separator, "");
+        assert_eq!(actual.default.collection, Some("pages".into()));
+        assert_eq!(actual.default.excerpt_separator, Some("".into()));
     }
 
     #[test]
@@ -182,7 +184,7 @@ mod tests {
         assert_eq!(actual.slug, "posts");
         assert_eq!(actual.dir.as_str(), "posts");
         assert_eq!(actual.drafts_dir, None);
-        assert_eq!(actual.default.collection, "posts");
+        assert_eq!(actual.default.collection, Some("posts".into()));
     }
 
     #[test]
@@ -193,12 +195,19 @@ mod tests {
             ..Default::default()
         };
 
-        let actual =
-            Collection::from_post_config(config, &cobalt_config::Site::default(), true, &common_default())
-                .unwrap();
+        let actual = Collection::from_post_config(
+            config,
+            &cobalt_config::Site::default(),
+            true,
+            &common_default(),
+        )
+        .unwrap();
 
         assert_eq!(
-            actual.drafts_dir.as_ref().map(cobalt_config::RelPath::as_str),
+            actual
+                .drafts_dir
+                .as_ref()
+                .map(cobalt_config::RelPath::as_str),
             Some("drafts")
         );
     }
