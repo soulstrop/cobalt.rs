@@ -252,8 +252,8 @@ mod tests {
         let temp = tempfile::tempdir().unwrap();
         let source = temp.path();
         let data_dir = source.join("_data");
-        fs::create_dir(&data_dir).unwrap();
-        fs::create_dir(data_dir.join("authors")).unwrap();
+        fs::create_dir_all(&data_dir).unwrap();
+        fs::create_dir_all(data_dir.join("authors")).unwrap();
         fs::write(data_dir.join("authors").join("ada.yml"), "name: Ada\n").unwrap();
         fs::write(data_dir.join("settings.json"), r#"{"theme":"dark"}"#).unwrap();
 
