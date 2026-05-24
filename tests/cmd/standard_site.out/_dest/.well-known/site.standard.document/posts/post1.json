@@ -1,0 +1,10 @@
+{
+  "$type": "site.standard.document",
+  "description": "",
+  "path": "/posts/post1.html",
+  "publishedAt": "Sat, 20 Jan 2024 14:30:00 +0000",
+  "site": "at://did:plc:123/site.standard.publication/rkey",
+  "tags": [],
+  "textContent": "This is a post for Standard.site.",
+  "title": "Standard Site Post"
+}

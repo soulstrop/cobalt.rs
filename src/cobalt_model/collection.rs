@@ -14,6 +14,7 @@ pub struct Collection {
     pub order: SortOrder,
     pub rss: Option<cobalt_config::RelPath>,
     pub jsonfeed: Option<cobalt_config::RelPath>,
+    pub standard_site: bool,
     pub publish_date_in_filename: bool,
     pub default: Frontmatter,
 }
@@ -63,6 +64,7 @@ impl Collection {
             order,
             rss,
             jsonfeed,
+            standard_site,
             default,
             publish_date_in_filename,
         } = config;
@@ -87,6 +89,7 @@ impl Collection {
             order,
             rss,
             jsonfeed,
+            standard_site,
             publish_date_in_filename,
             default,
         };
@@ -122,6 +125,10 @@ impl Collection {
                 liquid::model::Value::scalar(jsonfeed.as_str().to_owned()),
             );
         }
+        attributes.insert(
+            "standard_site".into(),
+            liquid::model::Value::scalar(self.standard_site),
+        );
         attributes
     }
 }

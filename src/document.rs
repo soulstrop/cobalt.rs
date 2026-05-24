@@ -132,6 +132,21 @@ impl Document {
         }
     }
 
+    pub(crate) fn to_standard_site_document(&self, site_at_uri: &str) -> serde_json::Value {
+        let published_at = self.front.published_date.map(|date| date.to_rfc2822());
+
+        serde_json::json!({
+            "$type": "site.standard.document",
+            "site": site_at_uri,
+            "title": self.front.title.as_str(),
+            "path": format!("/{}", self.url_path),
+            "description": self.front.description.as_ref().map(|s| s.as_str()).unwrap_or(""),
+            "publishedAt": published_at,
+            "tags": self.front.tags.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
+            "textContent": self.content.as_str().trim(),
+        })
+    }
+
     pub(crate) fn to_sitemap<T: std::io::Write>(
         &self,
         root_url: &str,

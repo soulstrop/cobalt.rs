@@ -5,3 +5,4 @@ site:
 posts:
   dir: "posts"
   rss: "rss.xml"
+  standard_site: true
