@@ -143,6 +143,8 @@ pub fn build(config: Config) -> Result<()> {
         create_sitemap(&path, &posts, &documents, context.site.base_url.as_deref())?;
     }
 
+    create_standard_site_records(&context)?;
+
     generate_pages(posts, documents, &context)?;
 
     // copy all remaining files in the source to the destination
@@ -526,6 +528,24 @@ fn create_sitemap(
     urls.end()?;
 
     files::write_document_file(String::from_utf8(buff)?, path)?;
+
+    Ok(())
+}
+
+fn create_standard_site_records(context: &Context) -> Result<()> {
+    if let Some(at_uri) = &context.site.at_uri {
+        debug!(
+            "Creating Standard.site publication verification at .well-known/site.standard.publication"
+        );
+        let path = context
+            .destination
+            .join(".well-known/site.standard.publication");
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)
+                .with_context(|| anyhow::format_err!("Could not create {}", parent.display()))?;
+        }
+        files::write_document_file(at_uri, &path)?;
+    }
 
     Ok(())
 }

@@ -22,6 +22,7 @@ pub struct Site {
     pub description: Option<liquid::model::KString>,
     pub base_url: Option<liquid::model::KString>,
     pub sitemap: Option<cobalt_config::RelPath>,
+    pub at_uri: Option<liquid::model::KString>,
     pub data: Option<liquid::Object>,
     pub data_dir: &'static str,
     /// The time at which the `cobalt` binary built the site
@@ -35,6 +36,7 @@ impl Site {
             description,
             base_url,
             sitemap,
+            at_uri,
             data,
             data_dir,
         } = config;
@@ -53,6 +55,7 @@ impl Site {
             description,
             base_url,
             sitemap,
+            at_uri,
             data,
             data_dir,
             time: DateTime::now(),
@@ -77,6 +80,12 @@ impl Site {
             attributes.insert(
                 "base_url".into(),
                 liquid::model::Value::scalar(liquid::model::KString::from_ref(base_url)),
+            );
+        }
+        if let Some(at_uri) = self.at_uri.as_ref() {
+            attributes.insert(
+                "at_uri".into(),
+                liquid::model::Value::scalar(liquid::model::KString::from_ref(at_uri)),
             );
         }
         attributes.insert("time".into(), liquid::model::Value::scalar(self.time));

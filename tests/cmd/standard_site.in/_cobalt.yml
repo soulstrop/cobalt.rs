@@ -1,0 +1,7 @@
+site:
+  title: "Standard Site Test"
+  base_url: "https://example.com"
+  at_uri: "at://did:plc:123/site.standard.publication/rkey"
+posts:
+  dir: "posts"
+  rss: "rss.xml"

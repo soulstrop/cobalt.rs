@@ -35,6 +35,8 @@ pub struct Frontmatter {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub is_draft: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub at_uri: Option<liquid_core::model::KString>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub weight: Option<i32>,
     #[serde(skip_serializing_if = "liquid_core::Object::is_empty")]
     pub data: liquid_core::Object,
@@ -107,6 +109,7 @@ impl Frontmatter {
             templated,
             layout,
             is_draft,
+            at_uri,
             weight,
             collection,
             data,
@@ -126,6 +129,7 @@ impl Frontmatter {
             templated: templated.or(other.templated),
             layout: layout.or_else(|| other.layout.clone()),
             is_draft: is_draft.or(other.is_draft),
+            at_uri: at_uri.or_else(|| other.at_uri.clone()),
             weight: weight.or(other.weight),
             collection: collection.or_else(|| other.collection.clone()),
             data: merge_objects(data, &other.data),

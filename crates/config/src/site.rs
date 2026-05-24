@@ -8,6 +8,7 @@ pub struct Site {
     pub description: Option<liquid_core::model::KString>,
     pub base_url: Option<liquid_core::model::KString>,
     pub sitemap: Option<crate::RelPath>,
+    pub at_uri: Option<liquid_core::model::KString>,
     pub data: Option<liquid_core::Object>,
     #[serde(skip)]
     pub data_dir: &'static str,
@@ -20,6 +21,7 @@ impl Default for Site {
             description: Default::default(),
             base_url: Default::default(),
             sitemap: Default::default(),
+            at_uri: Default::default(),
             data: Default::default(),
             data_dir: "_data",
         }

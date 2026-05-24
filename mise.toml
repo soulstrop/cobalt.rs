@@ -1,0 +1,32 @@
+[tools]
+rust = "stable"
+#cargo-hack = "latest"
+"github:taiki-e/cargo-hack" = "latest"
+
+[tasks.build]
+run = "cargo build --workspace"
+description = "Build the workspace"
+
+[tasks.test]
+run = "cargo test --workspace"
+description = "Run all tests"
+
+[tasks.check]
+run = "cargo check --workspace"
+description = "Check the workspace"
+
+[tasks.clippy]
+run = "cargo clippy --workspace --all-features --all-targets -- -D warnings"
+description = "Run clippy"
+
+[tasks.fmt]
+run = "cargo fmt --all"
+description = "Format code"
+
+[tasks.docs]
+run = "cargo doc --workspace --all-features --no-deps"
+description = "Generate documentation"
+
+[tasks.ci]
+depends = ["fmt", "clippy", "test"]
+description = "Run CI tasks locally"

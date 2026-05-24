@@ -376,6 +376,16 @@ fn document_attributes(
         ("categories".into(), categories),
         ("tags".into(), tags),
         ("is_draft".into(), Value::scalar(front.is_draft)),
+        (
+            "at_uri".into(),
+            Value::scalar(
+                front
+                    .at_uri
+                    .as_ref()
+                    .map(|s| s.as_str().to_owned())
+                    .unwrap_or_default(),
+            ),
+        ),
         ("weight".into(), Value::scalar(front.weight)),
         ("file".into(), Value::Object(file)),
         ("collection".into(), Value::scalar(front.collection.clone())),
