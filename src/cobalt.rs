@@ -204,6 +204,8 @@ fn generate_doc(
             parser: &context.liquid,
             markdown: &context.markdown,
             globals: &globals,
+            #[cfg(feature = "html-minifier")]
+            minify: context.minify.clone(),
         };
 
         doc.render_excerpt(&render_context).with_context(|| {
@@ -223,6 +225,8 @@ fn generate_doc(
         parser: &context.liquid,
         markdown: &context.markdown,
         globals: &globals,
+        #[cfg(feature = "html-minifier")]
+        minify: context.minify.clone(),
     };
     let doc_html = doc
         .render(&render_context, &context.layouts)

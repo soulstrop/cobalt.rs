@@ -22,6 +22,8 @@ pub(crate) struct RenderContext<'a> {
     pub(crate) parser: &'a cobalt_model::Liquid,
     pub(crate) markdown: &'a cobalt_model::Markdown,
     pub(crate) globals: &'a Object,
+    #[cfg(feature = "html-minifier")]
+    pub(crate) minify: cobalt_model::Minify,
 }
 
 #[derive(Debug, Clone)]
