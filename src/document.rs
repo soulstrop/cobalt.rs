@@ -13,7 +13,6 @@ use regex::Regex;
 use rss::Category;
 
 use crate::cobalt_model;
-use crate::cobalt_model::Minify;
 use crate::cobalt_model::files;
 use crate::cobalt_model::permalink;
 use crate::cobalt_model::slug;
@@ -23,7 +22,6 @@ pub(crate) struct RenderContext<'a> {
     pub(crate) parser: &'a cobalt_model::Liquid,
     pub(crate) markdown: &'a cobalt_model::Markdown,
     pub(crate) globals: &'a Object,
-    pub(crate) minify: Minify,
 }
 
 #[derive(Debug, Clone)]
@@ -418,7 +416,7 @@ fn document_attributes(
 #[cfg(not(feature = "html-minifier"))]
 fn minify_if_enabled(
     html: String,
-    _context: &RenderContext,
+    _context: &RenderContext<'_>,
     _file_path: &relative_path::RelativePath,
 ) -> Result<String> {
     Ok(html)

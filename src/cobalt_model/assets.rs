@@ -1,8 +1,6 @@
 use std::ffi::OsStr;
 use std::path;
 
-use anyhow::Context as _;
-use log::debug;
 use serde::{Deserialize, Serialize};
 
 use super::sass;

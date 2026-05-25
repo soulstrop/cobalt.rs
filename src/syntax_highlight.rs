@@ -81,7 +81,7 @@ fn has_syntax_theme(syntax: &SyntaxHighlight, name: &str) -> error::Result<bool>
 }
 
 #[cfg(not(feature = "syntax-highlight"))]
-fn has_syntax_theme(syntax: &SyntaxHighlight, name: &str) -> error::Result<bool> {
+fn has_syntax_theme(_syntax: &SyntaxHighlight, _name: &str) -> error::Result<bool> {
     anyhow::bail!("Themes are unsupported in this build.");
 }
 

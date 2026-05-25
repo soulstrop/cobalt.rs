@@ -100,7 +100,7 @@ impl SassCompiler {
         source: &path::Path,
         dest: &path::Path,
         file_path: &path::Path,
-        minify: &Minify,
+        _minify: &Minify,
     ) -> Result<()> {
         let rel_src = file_path
             .strip_prefix(source)
