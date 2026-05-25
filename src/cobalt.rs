@@ -586,7 +586,11 @@ pub fn classify_path<'s>(
             return Some((posts.slug.as_str(), false));
         }
 
-        if posts.drafts_dir.as_ref().is_some_and(|d| path.starts_with(d)) {
+        if posts
+            .drafts_dir
+            .as_ref()
+            .is_some_and(|d| path.starts_with(d))
+        {
             return Some((posts.slug.as_str(), true));
         }
 
