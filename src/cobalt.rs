@@ -586,10 +586,8 @@ pub fn classify_path<'s>(
             return Some((posts.slug.as_str(), false));
         }
 
-        if let Some(drafts_dir) = posts.drafts_dir.as_ref() {
-            if path.starts_with(drafts_dir) {
-                return Some((posts.slug.as_str(), true));
-            }
+        if posts.drafts_dir.as_ref().is_some_and(|d| path.starts_with(d)) {
+            return Some((posts.slug.as_str(), true));
         }
 
         Some((pages.slug.as_str(), false))
