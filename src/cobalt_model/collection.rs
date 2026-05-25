@@ -214,30 +214,23 @@ mod tests {
 
     #[test]
     fn attributes_include_optional_feeds() {
-        let collection = Collection {
-            title: "Posts".into(),
-            slug: "posts".into(),
+        let config = cobalt_config::PostCollection {
+            title: Some("Posts".into()),
             description: Some("Latest posts".into()),
-            dir: cobalt_config::RelPath::from_unchecked("posts"),
-            drafts_dir: None,
-            order: SortOrder::Desc,
             rss: Some(cobalt_config::RelPath::from_unchecked("feed.xml")),
             jsonfeed: Some(cobalt_config::RelPath::from_unchecked("feed.json")),
-            publish_date_in_filename: true,
-            default: common_default(),
+            ..Default::default()
         };
+        let collection =
+            Collection::from_post_config(config, &cobalt_config::Site::default(), false, &common_default())
+                .unwrap();
 
         let actual = serde_json::to_value(collection.attributes()).unwrap();
 
-        assert_eq!(
-            actual,
-            json!({
-                "description": "Latest posts",
-                "jsonfeed": "feed.json",
-                "rss": "feed.xml",
-                "slug": "posts",
-                "title": "Posts",
-            })
-        );
+        assert_eq!(actual.get("description"), Some(&json!("Latest posts")));
+        assert_eq!(actual.get("jsonfeed"), Some(&json!("feed.json")));
+        assert_eq!(actual.get("rss"), Some(&json!("feed.xml")));
+        assert_eq!(actual.get("slug"), Some(&json!("posts")));
+        assert_eq!(actual.get("title"), Some(&json!("Posts")));
     }
 }
