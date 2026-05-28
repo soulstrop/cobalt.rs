@@ -228,9 +228,13 @@ mod tests {
             jsonfeed: Some(cobalt_config::RelPath::from_unchecked("feed.json")),
             ..Default::default()
         };
-        let collection =
-            Collection::from_post_config(config, &cobalt_config::Site::default(), false, &common_default())
-                .unwrap();
+        let collection = Collection::from_post_config(
+            config,
+            &cobalt_config::Site::default(),
+            false,
+            &common_default(),
+        )
+        .unwrap();
 
         let actual = serde_json::to_value(collection.attributes()).unwrap();
 
