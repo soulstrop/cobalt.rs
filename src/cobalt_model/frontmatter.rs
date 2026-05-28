@@ -115,3 +115,93 @@ impl fmt::Display for Frontmatter {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn valid_config() -> cobalt_config::Frontmatter {
+        cobalt_config::Frontmatter {
+            slug: Some("example-post".into()),
+            title: Some("Example Post".into()),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn from_config_applies_defaults_and_pagination() {
+        let mut config = valid_config();
+        config.pagination = Some(cobalt_config::Pagination {
+            include: Some(cobalt_config::Include::Tags),
+            ..Default::default()
+        });
+
+        let actual = Frontmatter::from_config(config).unwrap();
+
+        assert_eq!(actual.excerpt_separator, "\n\n");
+        assert_eq!(actual.weight, 0);
+        assert!(!actual.is_draft);
+        assert_eq!(
+            actual.pagination.as_ref().unwrap().include,
+            cobalt_config::Include::Tags
+        );
+        assert_eq!(actual.pagination.as_ref().unwrap().per_page, 10);
+        assert_eq!(
+            actual.pagination.as_ref().unwrap().date_index,
+            vec![
+                cobalt_config::DateIndex::Year,
+                cobalt_config::DateIndex::Month
+            ]
+        );
+    }
+
+    #[test]
+    fn from_config_rejects_blank_tags() {
+        let mut config = valid_config();
+        config.tags = Some(vec!["valid".into(), "   ".into()]);
+
+        let err = Frontmatter::from_config(config).unwrap_err();
+
+        assert_eq!(err.to_string(), "Empty strings are not allowed in tags");
+    }
+
+    #[test]
+    fn from_config_requires_slug() {
+        let mut config = valid_config();
+        config.slug = None;
+
+        let err = Frontmatter::from_config(config).unwrap_err();
+
+        assert_eq!(err.to_string(), "No slug");
+    }
+
+    #[test]
+    fn from_config_requires_title() {
+        let mut config = valid_config();
+        config.title = None;
+
+        let err = Frontmatter::from_config(config).unwrap_err();
+
+        assert_eq!(err.to_string(), "No title");
+    }
+
+    #[test]
+    fn from_config_rejects_unsorted_date_index() {
+        let mut config = valid_config();
+        config.pagination = Some(cobalt_config::Pagination {
+            include: Some(cobalt_config::Include::Dates),
+            date_index: Some(vec![
+                cobalt_config::DateIndex::Month,
+                cobalt_config::DateIndex::Year,
+            ]),
+            ..Default::default()
+        });
+
+        let err = Frontmatter::from_config(config).unwrap_err();
+
+        assert_eq!(
+            err.to_string(),
+            "date_index is not correctly sorted: Year > Month > Day..."
+        );
+    }
+}
