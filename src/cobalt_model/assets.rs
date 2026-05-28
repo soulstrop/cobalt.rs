@@ -1,7 +1,9 @@
 use std::ffi::OsStr;
 use std::path;
 
+#[cfg(feature = "html-minifier")]
 use anyhow::Context as _;
+#[cfg(feature = "html-minifier")]
 use log::debug;
 use serde::{Deserialize, Serialize};
 

@@ -13,7 +13,6 @@ use regex::Regex;
 use rss::Category;
 
 use crate::cobalt_model;
-use crate::cobalt_model::Minify;
 use crate::cobalt_model::files;
 use crate::cobalt_model::permalink;
 use crate::cobalt_model::slug;
@@ -23,7 +22,8 @@ pub(crate) struct RenderContext<'a> {
     pub(crate) parser: &'a cobalt_model::Liquid,
     pub(crate) markdown: &'a cobalt_model::Markdown,
     pub(crate) globals: &'a Object,
-    pub(crate) minify: Minify,
+    #[cfg(feature = "html-minifier")]
+    pub(crate) minify: cobalt_model::Minify,
 }
 
 #[derive(Debug, Clone)]
@@ -130,6 +130,21 @@ impl Document {
             tags: Some(tags),
             ..Default::default()
         }
+    }
+
+    pub(crate) fn to_standard_site_document(&self, site_at_uri: &str) -> serde_json::Value {
+        let published_at = self.front.published_date.map(|date| date.to_rfc2822());
+
+        serde_json::json!({
+            "$type": "site.standard.document",
+            "site": site_at_uri,
+            "title": self.front.title.as_str(),
+            "path": format!("/{}", self.url_path),
+            "description": self.front.description.as_ref().map(|s| s.as_str()).unwrap_or(""),
+            "publishedAt": published_at,
+            "tags": self.front.tags.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
+            "textContent": self.content.as_str().trim(),
+        })
     }
 
     pub(crate) fn to_sitemap<T: std::io::Write>(
@@ -403,7 +418,7 @@ fn document_attributes(
 #[cfg(not(feature = "html-minifier"))]
 fn minify_if_enabled(
     html: String,
-    _context: &RenderContext,
+    _context: &RenderContext<'_>,
     _file_path: &relative_path::RelativePath,
 ) -> Result<String> {
     Ok(html)

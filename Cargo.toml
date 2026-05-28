@@ -8,7 +8,7 @@ resolver = "3"
 repository = "https://github.com/cobalt-org/cobalt.rs"
 license = "MIT OR Apache-2.0"
 edition = "2024"
-rust-version = "1.85"  # MSRV
+rust-version = "1.95"  # MSRV
 include = [
   "build.rs",
   "src/**/*",
@@ -159,7 +159,7 @@ liquid-core = "0.26.9"
 liquid-lib = { version = "0.26.9", features = ["jekyll", "shopify", "extra"] }
 deunicode = "1.6.2"
 walkdir = "2.5.0"
-time = "0.3.41"
+time = "0.3.47"
 log = "0.4.27"
 env_logger = "0.11.8"
 rss = "2.0.12"

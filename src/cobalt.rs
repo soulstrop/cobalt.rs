@@ -143,7 +143,7 @@ pub fn build(config: Config) -> Result<()> {
         create_sitemap(&path, &posts, &documents, context.site.base_url.as_deref())?;
     }
 
-    create_standard_site_records(&context)?;
+    create_standard_site_records(&context, &posts)?;
 
     generate_pages(posts, documents, &context)?;
 
@@ -204,6 +204,7 @@ fn generate_doc(
             parser: &context.liquid,
             markdown: &context.markdown,
             globals: &globals,
+            #[cfg(feature = "html-minifier")]
             minify: context.minify.clone(),
         };
 
@@ -224,6 +225,7 @@ fn generate_doc(
         parser: &context.liquid,
         markdown: &context.markdown,
         globals: &globals,
+        #[cfg(feature = "html-minifier")]
         minify: context.minify.clone(),
     };
     let doc_html = doc
@@ -532,7 +534,7 @@ fn create_sitemap(
     Ok(())
 }
 
-fn create_standard_site_records(context: &Context) -> Result<()> {
+fn create_standard_site_records(context: &Context, posts: &[Document]) -> Result<()> {
     if let Some(at_uri) = &context.site.at_uri {
         debug!(
             "Creating Standard.site publication verification at .well-known/site.standard.publication"
@@ -545,6 +547,29 @@ fn create_standard_site_records(context: &Context) -> Result<()> {
                 .with_context(|| anyhow::format_err!("Could not create {}", parent.display()))?;
         }
         files::write_document_file(at_uri, &path)?;
+
+        if context.posts.standard_site {
+            for post in posts {
+                if post.front.at_uri.is_some() {
+                    let record = post.to_standard_site_document(at_uri);
+                    let record_json = serde_json::to_string_pretty(&record)?;
+
+                    // Use a predictable path: .well-known/site.standard.document/path/to/post.json
+                    let mut record_path = context
+                        .destination
+                        .join(".well-known/site.standard.document");
+                    let mut rel_path = path::PathBuf::from(&post.url_path);
+                    rel_path.set_extension("json");
+                    record_path.push(rel_path);
+
+                    debug!(
+                        "Creating Standard.site document record at {}",
+                        record_path.display()
+                    );
+                    files::write_document_file(record_json, &record_path)?;
+                }
+            }
+        }
     }
 
     Ok(())
@@ -561,10 +586,12 @@ pub fn classify_path<'s>(
             return Some((posts.slug.as_str(), false));
         }
 
-        if let Some(drafts_dir) = posts.drafts_dir.as_ref() {
-            if path.starts_with(drafts_dir) {
-                return Some((posts.slug.as_str(), true));
-            }
+        if posts
+            .drafts_dir
+            .as_ref()
+            .is_some_and(|d| path.starts_with(d))
+        {
+            return Some((posts.slug.as_str(), true));
         }
 
         Some((pages.slug.as_str(), false))

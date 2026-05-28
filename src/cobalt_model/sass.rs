@@ -54,6 +54,9 @@ impl SassCompiler {
         file_path: &path::Path,
         minify: &Minify,
     ) -> Result<()> {
+        #[cfg(not(feature = "html-minifier"))]
+        let _ = minify;
+
         let sass_opts = grass::Options::default()
             .style(match self.style {
                 SassOutputStyle::Nested | SassOutputStyle::Expanded => grass::OutputStyle::Expanded,
@@ -100,7 +103,7 @@ impl SassCompiler {
         source: &path::Path,
         dest: &path::Path,
         file_path: &path::Path,
-        minify: &Minify,
+        _minify: &Minify,
     ) -> Result<()> {
         let rel_src = file_path
             .strip_prefix(source)

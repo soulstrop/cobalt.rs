@@ -138,10 +138,8 @@ impl Files {
             return false;
         }
         let is_dir = false;
-        if let Some(ref subtree) = self.subtree {
-            if !file.starts_with(subtree) {
-                return false;
-            }
+        if self.subtree.as_ref().is_some_and(|s| !file.starts_with(s)) {
+            return false;
         }
         self.includes_path(file, is_dir)
     }
@@ -149,10 +147,8 @@ impl Files {
     #[cfg(test)]
     pub fn includes_dir(&self, dir: &path::Path) -> bool {
         let is_dir = true;
-        if let Some(ref subtree) = self.subtree {
-            if !dir.starts_with(subtree) {
-                return false;
-            }
+        if self.subtree.as_ref().is_some_and(|s| !dir.starts_with(s)) {
+            return false;
         }
         self.includes_path(dir, is_dir)
     }
@@ -178,10 +174,8 @@ impl Files {
             return false;
         }
 
-        if let Some(ref subtree) = self.subtree {
-            if !file.starts_with(subtree) {
-                return false;
-            }
+        if self.subtree.as_ref().is_some_and(|s| !file.starts_with(s)) {
+            return false;
         }
 
         // Assumption: The parent paths will have been checked before we even get to this point.
@@ -193,17 +187,14 @@ impl Files {
             return true;
         }
 
-        let parent = path.parent();
-        if let Some(mut parent) = parent {
-            if parent.starts_with(&self.root_dir) {
-                // HACK: Gitignore seems to act differently on Windows/Linux, so putting this in to
-                // get them to act the same
-                if parent == path::Path::new(".") {
-                    parent = path::Path::new("./");
-                }
-                if !self.includes_path(parent, parent.is_dir()) {
-                    return false;
-                }
+        if let Some(mut parent) = path.parent().filter(|p| p.starts_with(&self.root_dir)) {
+            // HACK: Gitignore seems to act differently on Windows/Linux, so putting this in to
+            // get them to act the same
+            if parent == path::Path::new(".") {
+                parent = path::Path::new("./");
+            }
+            if !self.includes_path(parent, parent.is_dir()) {
+                return false;
             }
         }
 

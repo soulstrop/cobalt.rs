@@ -58,10 +58,11 @@ impl Frontmatter {
 
         let permalink = permalink.unwrap_or_default();
 
-        if let Some(tags) = &tags {
-            if tags.iter().any(|x| x.trim().is_empty()) {
-                anyhow::bail!("Empty strings are not allowed in tags");
-            }
+        if tags
+            .as_ref()
+            .is_some_and(|tags| tags.iter().any(|x| x.trim().is_empty()))
+        {
+            anyhow::bail!("Empty strings are not allowed in tags");
         }
         let fm = Frontmatter {
             pagination: pagination
@@ -88,10 +89,12 @@ impl Frontmatter {
             data,
         };
 
-        if let Some(pagination) = &fm.pagination {
-            if !pagination::is_date_index_sorted(&pagination.date_index) {
-                anyhow::bail!("date_index is not correctly sorted: Year > Month > Day...");
-            }
+        if fm
+            .pagination
+            .as_ref()
+            .is_some_and(|pagination| !pagination::is_date_index_sorted(&pagination.date_index))
+        {
+            anyhow::bail!("date_index is not correctly sorted: Year > Month > Day...");
         }
         Ok(fm)
     }
