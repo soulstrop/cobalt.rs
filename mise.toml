@@ -1,5 +1,5 @@
 [tools]
-rust = "stable"
+rust = "latest"
 #cargo-hack = "latest"
 "github:taiki-e/cargo-hack" = "latest"
 
